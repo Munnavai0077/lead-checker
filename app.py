@@ -2,120 +2,6 @@ from flask import Flask, request
 
 app = Flask(__name__)
 
-# 🎯 Target roles and industries
-TARGET_ROLES = [
-    "Vice President of Software Engineering",
-    "Senior Software Engineering Manager",
-    "Director of Quality Assurance",
-    "Human Resources Director",
-    "Senior Information Technology Manager",
-    "Senior Recruitment Manager",
-    "Chief Product Officer",
-    "Senior Director Quality Assurance",
-    "Associate Director Quality Assurance",
-    "Director Software Quality Assurance",
-    "Director of Analytics",
-    "Chief Technology Officer",
-    "Chief Innovation Officer",
-    "Director of Software Engineering",
-    "Director of Information Technology",
-    "Chief People Officer",
-    "Software Engineering Manager",
-    "Head of Talent Management",
-    "Engineering Manager",
-    "Vice President Talent Acquisition",
-    "Senior Manager Talent Acquisition",
-    "Head of Web Development",
-    "Head of Engineering",
-    "Senior Manager Quality Engineering",
-    "Vice President of Product Management",
-    "Chief Information Officer",
-    "Senior SAP Project Manager",
-    "Senior Human Resources Partner",
-    "Senior Director of Software Engineering",
-    "SAP Project Manager",
-    "Information Technology Operations Project Manager",
-    "Cloud Architect",
-    "Director Data Science",
-    "Head of Data Science",
-    "Chief Digital Officer",
-    "Head of Machine Learning",
-    "Manager of Artificial Intelligence",
-    "Director of Artificial Intelligence",
-    "Vice President of Artificial Intelligence",
-    "Information Technology Service Management Specialist",
-    "Vice President of Digital Transformation",
-    "Product Manager",
-    "Senior Product Manager",
-    "Director Application Development",
-    "Chief Operating Officer",
-    "Head of Product",
-    "Director Information Technology Operations",
-    "DevOps Manager",
-    "Director of DevOps",
-    "Head of DevOps",
-    "Chief Information Technology Officer",
-    "Quality Assurance Team Lead",
-    "Director of Engineering",
-    "Head of Procurement",
-    "Head of Product Management",
-    "Director of Technology",
-    "Senior Quality Assurance Manager",
-    "Senior Human Resources Business Partner",
-    "Head of Recruitment",
-    "Technology Manager",
-    "Vice President Quality Assurance",
-    "Head of Information Technology Department",
-    "Senior Procurement Manager",
-    "Vice President of Engineering",
-    "Director SAP",
-    "Head of Quality Assurance",
-    "Senior Technical Project Manager",
-    "Senior Vice President of Technology",
-    "Senior Director of Product Management",
-    "Head of Software",
-    "Technical Project Manager",
-    "Procurement Manager",
-    "Delivery Manager",
-    "Human Resources Business Partner",
-    "Human Resources Business Manager",
-    "Information Technology Manager",
-    "Director of Product Management",
-    "Senior Vice President Information Technology",
-    "Talent Director",
-    "Head of Information Technology",
-    "Director Information Technology Infrastructure",
-    "Recruiting Manager",
-    "Vice President Information Technology",
-    "Head of Software Engineering",
-    "Vice President of Technology",
-    "Head of Human Resources",
-    "Transformation Director",
-    "Senior Vice President of Engineering",
-    "Director Talent Acquisition",
-    "Chief Executive Officer",
-    "Director of Operations",
-    "Head of Information Technology Operations",
-    "Director of Product Development",
-    "Information Technology Service Delivery Manager",
-    "Director Enterprise Resources Planning",
-    "Enterprise Architect",
-    "Director Quality Engineering",
-    "Software Test Manager",
-    "Quality Assurance Test Manager",
-    "Director of Recruiting"
-]
-
-TARGET_INDUSTRIES = [
-    "SaaS (Software as a Service)",
-    "Technology & IT Services",
-    "Cloud Solutions & Enterprise Software",
-    "AI / Machine Learning / Automation",
-    "Digital Transformation & Consulting Firms",
-    "B2B Software / Enterprise Applications"
-]
-
-# 🎨 HTML Form with styling
 HTML_FORM = """
 <!doctype html>
 <html>
@@ -147,28 +33,25 @@ HTML_FORM = """
             margin: 10px 0;
             width: 90%;
             border: 1px solid #ccc;
-            border-radius: 6px;
+            border-radius: 8px;
         }
         button {
             padding: 10px 20px;
-            border: none;
-            border-radius: 6px;
-            background: #007bff;
+            background: #4CAF50;
             color: white;
+            border: none;
+            border-radius: 8px;
             cursor: pointer;
         }
         button:hover {
-            background: #0056b3;
+            background: #45a049;
         }
         .result {
             margin-top: 20px;
-            padding: 15px;
-            border-radius: 8px;
-            font-weight: bold;
+            font-size: 14px;
+            color: #333;
+            text-align: left;
         }
-        .green { background: #d4edda; color: #155724; }
-        .yellow { background: #fff3cd; color: #856404; }
-        .red { background: #f8d7da; color: #721c24; }
     </style>
 </head>
 <body>
@@ -187,30 +70,33 @@ HTML_FORM = """
 
 @app.route("/", methods=["GET", "POST"])
 def home():
-    result_html = ""
+    result = ""
     if request.method == "POST":
         role = request.form.get("role", "").strip()
         industry = request.form.get("industry", "").strip()
 
-        role_check = f"Role: {role} → It is wrong"
-        industry_check = f"Industry: {industry} → Does not fall under the 6 targeted industries"
-        final = '<div class="result red">Final: ❌ Red (Not a Match)</div>'
+        # check role only if user entered something
+        role_result = ""
+        if role:
+            if "chief operating officer" in role.lower():
+                role_result = f"Role: {role} → ✅ It is correct<br>"
+            else:
+                role_result = f"Role: {role} → ❌ It is wrong<br>"
 
-        if role and any(r.lower() == role.lower() for r in TARGET_ROLES):
-            role_check = f"Role: {role} → It is correct"
-        if industry and any(i.lower() in industry.lower() for i in TARGET_INDUSTRIES):
-            industry_check = f"Industry: {industry} → Falls under the 6 targeted industries"
+        # industry check
+        industry_result = ""
+        final = ""
+        if industry:
+            if any(word in industry.lower() for word in ["saas", "ai", "cloud", "automation", "software"]):
+                industry_result = f"Industry: {industry} → Falls under the 6 targeted industries<br>"
+                final = "Final: ✅ Green (Good Industry)"
+            else:
+                industry_result = f"Industry: {industry} → Does not fall under the 6 targeted industries<br>"
+                final = "Final: ❌ Red (Not a Match)"
 
-        # ✅ Final Decision
-        if "correct" in role_check and "Falls under" in industry_check:
-            final = '<div class="result green">Final: ✅ Green (Good Lead)</div>'
-        elif "correct" in role_check or "Falls under" in industry_check:
-            final = '<div class="result yellow">Final: ⚠️ Yellow (Partial)</div>'
+        result = f"<div class='result'>{role_result}{industry_result}{final}</div>"
 
-        result_html = f"<p>{role_check}</p><p>{industry_check}</p>{final}"
-
-    return HTML_FORM.format(result=result_html)
-
+    return HTML_FORM.format(result=result)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
